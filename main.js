@@ -41,10 +41,39 @@
     var running = false;
     var lastT = 0;
     var spawnTimer = 0;
-
+    var waveSpawned = 0;
+    var waveSize = 0;
+    var waveIndex = 0;
+    var waveTailTimer = 0;
+    var waveOverlapTarget = 2000;
+    var nextSpawnGap = 300;
+    var avoidZone = null;
+    var FIELD_PAD = 80;
+    var fieldH = 0;
+    var mobileLayout = window.matchMedia("(max-width: 880px)");
     var RGB = "255,255,255";
-    var MAX = 14;
-    var EDGES = ["bottom-left", "bottom-right", "left", "right", "top-left", "top-right"];
+
+    function isMobileLayout() {
+      return mobileLayout.matches;
+    }
+
+    function maxButterflies() {
+      return isMobileLayout() ? 7 : 12;
+    }
+
+    function trimToCap() {
+      var cap = maxButterflies();
+      while (butterflies.length > cap) {
+        butterflies.pop();
+      }
+    }
+
+    function lerpAngle(a, b, t) {
+      var d = b - a;
+      while (d > Math.PI) d -= Math.PI * 2;
+      while (d < -Math.PI) d += Math.PI * 2;
+      return a + d * t;
+    }
 
     function wing(ctx, side, flap, alpha) {
       var s = side;
@@ -63,17 +92,23 @@
     }
 
     function drawOne(b, t) {
+      var emerge = b.emerge != null ? b.emerge : 1;
       var flap = reduceMotion
         ? 0.7
-        : 0.45 + 0.55 * Math.abs(Math.sin(t * 0.003 * b.flapSpeed + b.flapPhase));
-      var bob = reduceMotion ? 0 : Math.sin(t * 0.0011 + b.pitchPhase) * 1.4;
+        : (0.45 + 0.55 * Math.abs(Math.sin(t * 0.003 * b.flapSpeed + b.flapPhase))) *
+          (0.62 + 0.38 * emerge);
+      var bob = reduceMotion ? 0 : Math.sin(t * 0.00085 + b.pitchPhase) * 0.9 * emerge;
 
       ctx.save();
       ctx.translate(b.x, b.y + bob);
-      ctx.rotate(b.heading + Math.PI / 2);
+      ctx.rotate(b.renderAngle);
       ctx.scale(b.scale, b.scale);
 
       var a = b.alpha;
+      if (emerge < 0.98) {
+        ctx.shadowColor = "rgba(255,255,255," + (0.28 * (1 - emerge)) + ")";
+        ctx.shadowBlur = 16 * (1 - emerge);
+      }
       ctx.strokeStyle = "rgba(" + RGB + "," + (a * 0.9) + ")";
       ctx.lineWidth = 0.6;
       ctx.lineCap = "round";
@@ -90,147 +125,384 @@
 
       wing(ctx, -1, flap, a * 0.82);
       wing(ctx, 1, flap, a * 0.82);
+      ctx.shadowBlur = 0;
       ctx.restore();
     }
 
-    function makeButterfly(x, y, heading) {
-      var speed = 0.5 + Math.random() * 0.45;
-      var alpha = 0.14 + Math.random() * 0.14;
+    function updateEmergence(b, dt) {
+      b.age += dt;
+      var t = Math.min(1, b.age / b.emergeMs);
+      var eased = 1 - Math.pow(1 - t, 3);
+      b.emerge = eased;
+      b.alpha = b.targetAlpha * eased;
+      b.scale = b.baseScale * (0.38 + 0.62 * eased);
+      b.speed = b.targetSpeed * (0.42 + 0.58 * eased);
+    }
+
+    function makeButterfly(x, y, heading, emergeMs) {
+      var targetAlpha = 0.14 + Math.random() * 0.1;
+      var baseScale = 0.82 + Math.random() * 0.55;
+      var targetSpeed = 0.4 + Math.random() * 0.12;
       return {
         x: x,
         y: y,
         heading: heading,
-        speed: speed,
-        vx: Math.cos(heading) * speed,
-        vy: Math.sin(heading) * speed,
-        scale: 0.75 + Math.random() * 0.95,
-        alpha: alpha,
-        flapSpeed: 1 + Math.random() * 0.7,
+        baseHeading: heading,
+        targetSpeed: targetSpeed,
+        speed: targetSpeed * 0.58,
+        vx: Math.cos(heading) * targetSpeed * 0.32,
+        vy: Math.sin(heading) * targetSpeed * 0.32,
+        baseScale: baseScale,
+        scale: baseScale * 0.45,
+        targetAlpha: targetAlpha,
+        alpha: 0,
+        emerge: 0,
+        age: 0,
+        emergeMs: emergeMs || 950 + Math.random() * 280,
+        flapSpeed: 0.85 + Math.random() * 0.35,
         flapPhase: Math.random() * Math.PI * 2,
         pitchPhase: Math.random() * Math.PI * 2,
         wanderPhase: Math.random() * Math.PI * 2,
-        wanderAmp: 0.05 + Math.random() * 0.07,
-        turnEase: 0.01 + Math.random() * 0.008,
-        lift: -0.01 - Math.random() * 0.012
+        renderAngle: heading + Math.PI / 2
       };
     }
 
-    function spawnInView() {
-      var heading = -Math.PI / 2 + (Math.random() - 0.5) * 0.9;
-      return makeButterfly(
-        w * (0.08 + Math.random() * 0.84),
-        h * (0.1 + Math.random() * 0.78),
-        heading
+    function randomSpawnY() {
+      var margin = Math.max(28, fieldH * 0.08);
+      var min = FIELD_PAD + margin;
+      var max = FIELD_PAD + fieldH - margin;
+      var y;
+      var tries;
+      var i;
+      var other;
+      var ok;
+      var zoneTop;
+      var zoneBottom;
+      var aboveHi;
+      var belowLo;
+
+      if (isMobileLayout() && avoidZone) {
+        zoneTop = avoidZone.top + FIELD_PAD;
+        zoneBottom = avoidZone.bottom + FIELD_PAD;
+        aboveHi = zoneTop - 20;
+        belowLo = zoneBottom + 20;
+
+        for (tries = 0; tries < 12; tries++) {
+          if (aboveHi > min + 32 && (belowLo >= max - 32 || Math.random() < 0.52)) {
+            y = min + Math.random() * (aboveHi - min);
+          } else if (belowLo < max - 32) {
+            y = belowLo + Math.random() * (max - belowLo);
+          } else {
+            y = min + Math.random() * (max - min);
+          }
+
+          ok = true;
+          for (i = butterflies.length - 1; i >= Math.max(0, butterflies.length - 7); i--) {
+            other = butterflies[i];
+            if (Math.abs(other.y - y) < 38) {
+              ok = false;
+              break;
+            }
+          }
+          if (ok) return y;
+        }
+        return min + Math.random() * (max - min);
+      }
+
+      for (tries = 0; tries < 10; tries++) {
+        y = min + Math.random() * (max - min);
+        ok = true;
+        for (i = butterflies.length - 1; i >= Math.max(0, butterflies.length - 7); i--) {
+          other = butterflies[i];
+          if (Math.abs(other.y - y) < 38) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) return y;
+      }
+      return min + Math.random() * (max - min);
+    }
+
+    function spawnFromRight() {
+      var y = randomSpawnY();
+      var x = w + 8 + Math.random() * 42;
+      var hy = y - FIELD_PAD;
+      var t = Math.max(0, Math.min(1, hy / Math.max(fieldH, 1)));
+      var heading = Math.PI + (0.06 - t * 0.12) + (Math.random() - 0.5) * 0.16;
+      return makeButterfly(x, y, heading, 820 + Math.random() * 520);
+    }
+
+    function updateAvoidZone() {
+      var hero = document.getElementById("hero");
+      var inner = document.querySelector(".hero__inner");
+      if (!hero || !inner || !w) return;
+      var hr = hero.getBoundingClientRect();
+      var ir = inner.getBoundingClientRect();
+      var pad = 10;
+
+      if (isMobileLayout()) {
+        var blocks = hero.querySelectorAll(".hero__name, .hero__prose, .hero__actions");
+        var left = Infinity;
+        var top = Infinity;
+        var right = -Infinity;
+        var bottom = -Infinity;
+        var j;
+        var br;
+
+        pad = 30;
+        for (j = 0; j < blocks.length; j++) {
+          br = blocks[j].getBoundingClientRect();
+          left = Math.min(left, br.left);
+          top = Math.min(top, br.top);
+          right = Math.max(right, br.right);
+          bottom = Math.max(bottom, br.bottom);
+        }
+
+        avoidZone = {
+          left: left - hr.left - pad,
+          top: top - hr.top - pad,
+          right: right - hr.left + pad,
+          bottom: bottom - hr.top + pad,
+          cx: (left + right) * 0.5 - hr.left,
+          cy: (top + bottom) * 0.5 - hr.top
+        };
+        return;
+      }
+
+      avoidZone = {
+        left: ir.left - hr.left - pad,
+        top: ir.top - hr.top - pad,
+        right: ir.right - hr.left + pad,
+        bottom: ir.bottom - hr.top + pad,
+        cx: (ir.left + ir.right) * 0.5 - hr.left,
+        cy: (ir.top + ir.bottom) * 0.5 - hr.top
+      };
+    }
+
+    function applyMobileContentAvoid(b, h) {
+      var hy = b.y - FIELD_PAD;
+      var buf = 46;
+      var approach = 80;
+      var inBand = hy > avoidZone.top - buf && hy < avoidZone.bottom + buf;
+      var inApproach = b.x > avoidZone.left - approach && b.x < avoidZone.right + 36;
+
+      if (!inBand || !inApproach) return h;
+
+      var above = hy < avoidZone.cy;
+      var steerY = above ? avoidZone.top - buf - 30 : avoidZone.bottom + buf + 30;
+      var steerX = avoidZone.left - 28;
+      var push = Math.atan2(steerY - hy, steerX - b.x);
+      var dx = b.x - avoidZone.cx;
+      var dy = hy - avoidZone.cy;
+      var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      var blend = b.emerge < 0.88
+        ? 0.6
+        : Math.min(0.74, 0.44 + 170 / dist);
+
+      return lerpAngle(h, push, blend);
+    }
+
+    function inTextZone(x, y, buffer) {
+      if (!avoidZone) return false;
+      var buf = buffer || 0;
+      return (
+        x > avoidZone.left - buf &&
+        x < avoidZone.right + buf &&
+        y > avoidZone.top - buf &&
+        y < avoidZone.bottom + buf
       );
     }
 
-    function spawn(edge) {
-      var e = edge || EDGES[Math.floor(Math.random() * EDGES.length)];
-      var heading;
-      var x;
-      var y;
+    function clampTurn(current, goal, maxStep) {
+      var d = goal - current;
+      while (d > Math.PI) d -= Math.PI * 2;
+      while (d < -Math.PI) d += Math.PI * 2;
+      if (d > maxStep) return current + maxStep;
+      if (d < -maxStep) return current - maxStep;
+      return goal;
+    }
 
-      if (e === "bottom-left") {
-        x = w * (0.05 + Math.random() * 0.38);
-        y = h + 24 + Math.random() * 55;
-        heading = -Math.PI / 2 + (Math.random() - 0.5) * 0.45;
-      } else if (e === "bottom-right") {
-        x = w * (0.57 + Math.random() * 0.38);
-        y = h + 24 + Math.random() * 55;
-        heading = -Math.PI / 2 + (Math.random() - 0.5) * 0.45;
-      } else if (e === "left") {
-        x = -24 - Math.random() * 28;
-        y = h * (0.2 + Math.random() * 0.65);
-        heading = 0.12 + (Math.random() - 0.5) * 0.28;
-      } else if (e === "right") {
-        x = w + 24 + Math.random() * 28;
-        y = h * (0.2 + Math.random() * 0.65);
-        heading = Math.PI - 0.12 + (Math.random() - 0.5) * 0.28;
-      } else if (e === "top-left") {
-        x = w * (0.08 + Math.random() * 0.32);
-        y = -20 - Math.random() * 28;
-        heading = Math.PI / 2 - 0.15 + (Math.random() - 0.5) * 0.22;
+    function desiredHeading(b, idx, list) {
+      var h;
+
+      if (b.emerge < 0.88) {
+        b.wanderPhase += 0.0012;
+        h = b.baseHeading + Math.sin(b.wanderPhase) * 0.022 * (1 - b.emerge);
       } else {
-        x = w * (0.6 + Math.random() * 0.32);
-        y = -20 - Math.random() * 28;
-        heading = Math.PI / 2 + 0.15 + (Math.random() - 0.5) * 0.22;
+        b.wanderPhase += 0.0018;
+        h = b.baseHeading + Math.sin(b.wanderPhase) * 0.028 +
+          Math.sin(b.wanderPhase * 0.43 + 0.8) * 0.014;
       }
 
-      return makeButterfly(x, y, heading);
+      if (isMobileLayout() && avoidZone) {
+        h = applyMobileContentAvoid(b, h);
+      } else if (avoidZone && inTextZone(b.x, b.y - FIELD_PAD, 10)) {
+        var dx = b.x - avoidZone.cx;
+        var dy = b.y - avoidZone.cy;
+        var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        var push = Math.atan2(dy / dist, dx / dist);
+        var blend = Math.min(0.32, 110 / dist);
+        h = lerpAngle(h, push, blend);
+      }
+
+      var sepX = 0;
+      var sepY = 0;
+      var neighbors = 0;
+      var minDist = 88;
+      var i, other, sdx, sdy, sdist, force;
+
+      for (i = 0; i < list.length; i++) {
+        if (i === idx) continue;
+        other = list[i];
+        sdx = b.x - other.x;
+        sdy = b.y - other.y;
+        sdist = Math.sqrt(sdx * sdx + sdy * sdy);
+        if (sdist > 0 && sdist < minDist) {
+          force = (minDist - sdist) / minDist;
+          sepX += (sdx / sdist) * force * force;
+          sepY += (sdy / sdist) * force * force;
+          neighbors++;
+        }
+      }
+
+      if (neighbors > 0 && b.emerge >= 0.95 && b.y > FIELD_PAD + 32) {
+        var skipSep = false;
+        if (isMobileLayout() && avoidZone) {
+          var mhy = b.y - FIELD_PAD;
+          skipSep = (
+            b.x > avoidZone.left - 64 &&
+            b.x < avoidZone.right + 44 &&
+            mhy > avoidZone.top - 52 &&
+            mhy < avoidZone.bottom + 52
+          );
+        }
+        if (!skipSep) {
+          var sepAngle = Math.atan2(sepY, sepX);
+          var sepBlend = Math.min(0.28, 0.08 + neighbors * 0.06);
+          h = lerpAngle(h, sepAngle, sepBlend);
+        }
+      }
+
+      return h;
     }
 
-    var emergeQueue = [];
-    var EMERGE_EDGES = [
-      "bottom-left", "bottom-right", "bottom-left", "bottom-right",
-      "left", "right", "bottom-left", "bottom-right"
-    ];
-
-    function queueEmergence() {
-      emergeQueue = EMERGE_EDGES.slice();
+    function beginWave() {
+      waveSpawned = 0;
+      waveTailTimer = 0;
+      if (isMobileLayout()) {
+        if (waveIndex === 0) {
+          waveSize = 1 + Math.floor(Math.random() * 2);
+        } else if (waveIndex === 1) {
+          waveSize = 2 + Math.floor(Math.random() * 2);
+        } else {
+          waveSize = 2 + Math.floor(Math.random() * 2);
+        }
+      } else if (waveIndex === 0) {
+        waveSize = 2 + Math.floor(Math.random() * 2);
+      } else if (waveIndex === 1) {
+        waveSize = 2 + Math.floor(Math.random() * 2);
+      } else {
+        waveSize = 3 + Math.floor(Math.random() * 3);
+      }
+      waveOverlapTarget = waveIndex < 2
+        ? 2600 + Math.random() * 500
+        : 1500 + Math.random() * 450;
+      nextSpawnGap = 360 + Math.random() * 280;
+      waveIndex++;
     }
 
-    function stepEmergence() {
-      if (!emergeQueue.length) return;
-      butterflies.push(spawn(emergeQueue.shift()));
+    function pushSpawn() {
+      if (waveSpawned >= waveSize || butterflies.length >= maxButterflies()) return false;
+      butterflies.push(spawnFromRight());
+      waveSpawned++;
+      nextSpawnGap = 260 + Math.random() * 380;
+      if (waveSpawned >= waveSize) waveTailTimer = 0;
+      return true;
     }
 
     function offscreen(b) {
-      var pad = 80;
-      return b.x < -pad || b.x > w + pad || b.y < -pad || b.y > h + pad;
+      return b.x < -50 || b.y < -24 || b.y > h + 24;
     }
 
     function size() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = canvas.clientWidth;
       h = canvas.clientHeight;
+      fieldH = Math.max(h - FIELD_PAD * 2, 1);
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       spawnTimer = 0;
-      emergeQueue = [];
+      waveSpawned = 0;
+      waveSize = 0;
+      waveIndex = 0;
+      waveTailTimer = 0;
       butterflies = [];
+      updateAvoidZone();
       if (reduceMotion) {
-        var count = Math.max(5, Math.min(8, Math.round(w / 140)));
+        var count = isMobileLayout()
+          ? Math.max(3, Math.min(5, Math.round(w / 180)))
+          : Math.max(4, Math.min(6, Math.round(w / 160)));
         var i;
+        var b;
         for (i = 0; i < count; i++) {
-          var b = spawnInView();
-          b.x = w * (0.52 + (i / Math.max(count - 1, 1)) * 0.35);
-          b.y = h * (0.2 + (i % 3) * 0.24);
+          b = spawnFromRight();
+          b.x = w - 18 - Math.random() * 30;
+          b.vx = 0;
+          b.vy = 0;
+          b.age = b.emergeMs;
+          b.emerge = 1;
+          b.alpha = b.targetAlpha;
+          b.scale = b.baseScale;
+          b.speed = b.targetSpeed;
           butterflies.push(b);
         }
       }
     }
 
     function tick(t, dt) {
-      var i, b, targetHeading, turn;
+      var i, b, goal, targetVx, targetVy;
 
       if (!reduceMotion) {
         spawnTimer += dt;
-        if (emergeQueue.length && spawnTimer > 320) {
-          stepEmergence();
+
+        if (!waveSize) beginWave();
+
+        if (waveSpawned === 0) {
+          pushSpawn();
+        } else if (waveSpawned < waveSize && spawnTimer >= nextSpawnGap) {
+          pushSpawn();
           spawnTimer = 0;
-        } else if (!emergeQueue.length && butterflies.length < MAX && spawnTimer > 750) {
-          butterflies.push(spawn());
-          spawnTimer = 0;
+        } else if (waveSpawned >= waveSize) {
+          waveTailTimer += dt;
+          if (waveTailTimer >= waveOverlapTarget) {
+            beginWave();
+            pushSpawn();
+          }
         }
 
         for (i = butterflies.length - 1; i >= 0; i--) {
           b = butterflies[i];
-          b.wanderPhase += dt * 0.0004;
-          targetHeading = b.heading +
-            Math.sin(b.wanderPhase) * b.wanderAmp +
-            Math.sin(b.wanderPhase * 0.5 + 1.2) * (b.wanderAmp * 0.4);
+          updateEmergence(b, dt);
+          goal = desiredHeading(b, i, butterflies);
+          b.heading = clampTurn(b.heading, goal, 0.028);
 
-          turn = targetHeading - b.heading;
-          while (turn > Math.PI) turn -= Math.PI * 2;
-          while (turn < -Math.PI) turn += Math.PI * 2;
-          b.heading += turn * b.turnEase;
+          targetVx = Math.cos(b.heading) * b.speed;
+          targetVy = Math.sin(b.heading) * b.speed;
+          b.vx += (targetVx - b.vx) * 0.06;
+          b.vy += (targetVy - b.vy) * 0.06;
 
-          b.vx = Math.cos(b.heading) * b.speed;
-          b.vy = Math.sin(b.heading) * b.speed + b.lift;
+          b.x += b.vx * dt * 0.065;
+          b.y += b.vy * dt * 0.065;
 
-          b.x += b.vx * dt * 0.06;
-          b.y += b.vy * dt * 0.06;
+          if (Math.abs(b.vx) + Math.abs(b.vy) > 0.012) {
+            b.renderAngle = lerpAngle(
+              b.renderAngle,
+              Math.atan2(b.vy, b.vx) + Math.PI / 2,
+              0.07
+            );
+          }
 
           if (offscreen(b)) {
             butterflies.splice(i, 1);
@@ -256,9 +528,11 @@
       if (running) return;
       running = true;
       lastT = 0;
-      spawnTimer = 0;
+      spawnTimer = nextSpawnGap;
       if (!reduceMotion && butterflies.length === 0) {
-        queueEmergence();
+        waveIndex = 0;
+        beginWave();
+        pushSpawn();
       }
       raf = requestAnimationFrame(frame);
     }
@@ -276,10 +550,32 @@
     var rt;
     window.addEventListener("resize", function () {
       clearTimeout(rt);
-      rt = setTimeout(function () { size(); tick(performance.now(), 16); }, 180);
+      rt = setTimeout(function () {
+        size();
+        updateAvoidZone();
+        tick(performance.now(), 16);
+      }, 180);
     });
 
+    var heroInner = document.querySelector(".hero__inner");
+    if (heroInner && "ResizeObserver" in window) {
+      new ResizeObserver(function () { updateAvoidZone(); }).observe(heroInner);
+    }
+
+    if (mobileLayout.addEventListener) {
+      mobileLayout.addEventListener("change", function () {
+        updateAvoidZone();
+        trimToCap();
+      });
+    } else if (mobileLayout.addListener) {
+      mobileLayout.addListener(function () {
+        updateAvoidZone();
+        trimToCap();
+      });
+    }
+
     var hero = document.getElementById("hero");
+    start();
     if ("IntersectionObserver" in window && hero) {
       new IntersectionObserver(function (entries) {
         entries.forEach(function (en) { en.isIntersecting ? start() : stop(); });
@@ -327,12 +623,10 @@
      =========================================================== */
   function initScroll() {
     var header = document.querySelector(".site-header");
-    var cue = document.querySelector(".scroll-cue");
 
     function onScroll() {
       if (window.scrollY > 24) header.classList.add("scrolled");
       else header.classList.remove("scrolled");
-      if (cue) cue.classList.toggle("is-hidden", window.scrollY > 48);
     }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
