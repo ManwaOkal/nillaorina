@@ -3,38 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nilla Orina · Computer Science × Cognitive Science</title>
-  <meta name="description" content="Nilla Orina is a computer scientist and cognitive scientist at the University of Pennsylvania studying how meaning emerges between people, and between people and machines. Research, projects, experience, and photography." />
+  <title>Nilla Orina · Computer Science &amp; Cognitive Science</title>
+  <meta name="description" content="Nilla Orina is a computer scientist and cognitive scientist at the University of Pennsylvania studying how meaning emerges between people and machines. Research, projects, experience, and photography." />
   <meta name="author" content="Nilla Orina" />
-  <meta name="theme-color" content="#070a12" />
+  <meta name="theme-color" content="#0a0d14" />
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Nilla Orina · Computer Science × Cognitive Science" />
-  <meta property="og:description" content="Studying how meaning emerges between minds and machines. Research, projects, and photography." />
+  <meta property="og:title" content="Nilla Orina · Computer Science &amp; Cognitive Science" />
+  <meta property="og:description" content="Computer scientist and cognitive scientist. Research, projects, and photography." />
 
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23070a12'/%3E%3Cline x1='10' y1='22' x2='22' y2='10' stroke='%23ffffff' stroke-opacity='.3' stroke-width='1.4'/%3E%3Ccircle cx='10' cy='22' r='3.4' fill='%23f4b860'/%3E%3Ccircle cx='22' cy='10' r='3.4' fill='%235ad1e3'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0d14'/%3E%3Cline x1='10' y1='22' x2='22' y2='10' stroke='%23ffffff' stroke-opacity='.3' stroke-width='1.4'/%3E%3Ccircle cx='10' cy='22' r='3.4' fill='%23f4b860'/%3E%3Ccircle cx='22' cy='10' r='3.4' fill='%235ad1e3'/%3E%3C/svg%3E" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body id="top">
   <a class="skip-link" href="#about">Skip to content</a>
 
   <!-- ===================== NAV ===================== -->
-  <header class="site-header" id="top">
+  <header class="site-header">
     <div class="container nav__inner">
-      <a class="nav__brand" href="#top" aria-label="Nilla Orina home">
+      <a class="brand" href="#top" aria-label="Nilla Orina home">
         <span class="brand__glyph" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="26" height="26">
+          <svg viewBox="0 0 32 32" width="24" height="24">
             <line x1="9" y1="23" x2="23" y2="9" />
             <line x1="9" y1="23" x2="24" y2="20" />
-            <circle class="g-warm" cx="9" cy="23" r="3.2" />
-            <circle class="g-cool" cx="23" cy="9" r="3.2" />
-            <circle class="g-dim" cx="24" cy="20" r="2" />
+            <circle class="g-warm" cx="9" cy="23" r="3.1" />
+            <circle class="g-cool" cx="23" cy="9" r="3.1" />
+            <circle class="g-dim" cx="24" cy="20" r="1.9" />
           </svg>
         </span>
         <span class="brand__name">Nilla&nbsp;Orina</span>
@@ -47,7 +46,7 @@
           <li><a class="nav__link" href="#projects">Projects</a></li>
           <li><a class="nav__link" href="#experience">Experience</a></li>
           <li><a class="nav__link" href="#photography">Photography</a></li>
-          <li><a class="nav__link nav__link--cta" href="#contact">Contact</a></li>
+          <li><a class="nav__link" href="#contact">Contact</a></li>
         </ul>
         <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
           <span></span><span></span><span></span>
@@ -63,18 +62,15 @@
       <div class="hero__veil" aria-hidden="true"></div>
 
       <div class="container hero__inner">
-        <p class="eyebrow reveal">
-          <span class="eyebrow__line" aria-hidden="true"></span>
+        <p class="kicker reveal">
+          <span class="kicker__rule" aria-hidden="true"></span>
           Computer Science <span class="x">×</span> Cognitive Science
         </p>
-
-        <h1 class="hero__title reveal">Nilla Orina</h1>
-
+        <h1 class="hero__name reveal">Nilla Orina</h1>
         <p class="hero__lead reveal">
           I study how meaning <em>emerges</em> between people, and between
           people and machines.
         </p>
-
         <div class="hero__actions reveal">
           <a class="btn btn--primary" href="#research">
             Explore research
@@ -82,7 +78,6 @@
           </a>
           <a class="btn btn--ghost" href="#photography">View photography</a>
         </div>
-
         <p class="hero__meta reveal">
           <span>University of Pennsylvania</span>
           <span class="dot" aria-hidden="true"></span>
@@ -92,25 +87,19 @@
         </p>
       </div>
 
-      <a class="scroll-cue" href="#about" aria-label="Scroll to about">
-        <span></span>
-      </a>
+      <a class="scroll-cue" href="#about" aria-label="Scroll to about"><span></span></a>
     </section>
 
     <!-- ===================== ABOUT ===================== -->
-    <section class="section about" id="about">
+    <section class="section" id="about">
       <div class="container">
-        <div class="section__head reveal">
-          <p class="eyebrow"><span class="eyebrow__num">01</span> About</p>
-          <h2 class="section__title">Computer science and cognitive science</h2>
-        </div>
+        <header class="head reveal">
+          <p class="kicker"><span class="kicker__num">01</span> About</p>
+          <h2 class="title">Computer science and cognitive science</h2>
+        </header>
 
-        <div class="about__grid">
-          <div class="about__main reveal">
-            <p class="about__lead">
-              I'm a computer scientist and cognitive scientist. I build
-              software and study how people understand each other.
-            </p>
+        <div class="about reveal">
+          <div class="prose">
             <p>
               At Penn I write NLP scrapers and data pipelines, design
               artificial-language-learning experiments in the Cultural Evolution
@@ -122,48 +111,23 @@
               Outside the lab, I'm usually behind a camera.
             </p>
           </div>
-
-          <aside class="about__card reveal">
-            <dl class="facts">
-              <div class="fact">
-                <dt>Studying</dt>
-                <dd>Computer Science &amp; Cognitive Science</dd>
-              </div>
-              <div class="fact">
-                <dt>Concentrations</dt>
-                <dd>Psychology · Computation &amp; Cognition</dd>
-              </div>
-              <div class="fact">
-                <dt>At</dt>
-                <dd>University of Pennsylvania, ’26</dd>
-              </div>
-              <div class="fact">
-                <dt>Focused on</dt>
-                <dd>Language, cognition &amp; human-centered tech</dd>
-              </div>
-              <div class="fact">
-                <dt>Based in</dt>
-                <dd>Philadelphia, PA</dd>
-              </div>
-            </dl>
-          </aside>
         </div>
       </div>
     </section>
 
     <!-- ===================== RESEARCH ===================== -->
-    <section class="section research" id="research">
+    <section class="section" id="research">
       <div class="container">
-        <div class="section__head reveal">
-          <p class="eyebrow"><span class="eyebrow__num">02</span> Research</p>
-          <h2 class="section__title">How languages evolve</h2>
-          <p class="section__intro">
+        <header class="head reveal">
+          <p class="kicker"><span class="kicker__num">02</span> Research</p>
+          <h2 class="title">How languages evolve</h2>
+          <p class="intro">
             In the <strong>Cultural Evolution of Language Lab</strong>, directed
             by Dr. Gareth Roberts, I study how language structure emerges from
             interaction. We teach people artificial languages from scratch and
             watch grammar take shape in real time.
           </p>
-        </div>
+        </header>
 
         <article class="feature reveal">
           <div class="feature__body">
@@ -178,7 +142,7 @@
               happens when <em>semantic</em> and <em>distributional</em> cues
               point in different directions, and which one wins.
             </p>
-            <ul class="feature__meta">
+            <ul class="meta-table">
               <li><span>Paradigm</span>Artificial language learning</li>
               <li><span>Method</span>Behavioral experiments &amp; analysis</li>
               <li><span>Stack</span>Python · R · PCIbex · Empirica</li>
@@ -205,135 +169,134 @@
     </section>
 
     <!-- ===================== PROJECTS ===================== -->
-    <section class="section projects" id="projects">
+    <section class="section" id="projects">
       <div class="container">
-        <div class="section__head reveal">
-          <p class="eyebrow"><span class="eyebrow__num">03</span> Selected projects</p>
-          <h2 class="section__title">Things I've built</h2>
-        </div>
+        <header class="head reveal">
+          <p class="kicker"><span class="kicker__num">03</span> Selected projects</p>
+          <h2 class="title">Things I've built</h2>
+        </header>
 
-        <div class="work-grid">
-          <article class="work reveal">
-            <div class="work__top">
-              <span class="work__index">01</span>
-              <span class="work__tag">Python · NLP</span>
+        <ol class="entries">
+          <li class="entry reveal">
+            <span class="entry__num">01</span>
+            <div class="entry__body">
+              <h3 class="entry__title">Daily Pennsylvanian Scraper</h3>
+              <p class="entry__desc">
+                An automated pipeline that extracts and cleans articles from
+                noisy, semi-structured pages, producing consistent input for
+                NLP analysis.
+              </p>
             </div>
-            <h3 class="work__title">Daily Pennsylvanian Scraper</h3>
-            <p class="work__desc">
-              An automated pipeline that extracts and cleans articles from noisy,
-              semi-structured pages, producing consistent structured input for
-              NLP analysis.
-            </p>
-          </article>
-
-          <article class="work reveal">
-            <div class="work__top">
-              <span class="work__index">02</span>
-              <span class="work__tag">Product · Data</span>
+            <span class="entry__tag">Python · NLP</span>
+          </li>
+          <li class="entry reveal">
+            <span class="entry__num">02</span>
+            <div class="entry__body">
+              <h3 class="entry__title">PCOSphere</h3>
+              <p class="entry__desc">
+                A symptom-tracking tool that turns daily behavioral inputs into
+                personalized lifestyle insights, with data models tuned for
+                consistency.
+              </p>
             </div>
-            <h3 class="work__title">PCOSphere</h3>
-            <p class="work__desc">
-              A symptom-tracking tool that turns daily behavioral inputs into
-              personalized lifestyle insights, with data models tuned for
-              consistency.
-            </p>
-          </article>
-
-          <article class="work reveal">
-            <div class="work__top">
-              <span class="work__index">03</span>
-              <span class="work__tag">UX Research</span>
+            <span class="entry__tag">Product · Data</span>
+          </li>
+          <li class="entry reveal">
+            <span class="entry__num">03</span>
+            <div class="entry__body">
+              <h3 class="entry__title">Penn Transit Product Strategy</h3>
+              <p class="entry__desc">
+                Stakeholder interviews and user research turned into a
+                prioritized roadmap to reduce onboarding friction for a transit
+                app serving 10,000+ riders.
+              </p>
             </div>
-            <h3 class="work__title">Penn Transit Product Strategy</h3>
-            <p class="work__desc">
-              Stakeholder interviews and user research turned into a prioritized
-              roadmap to reduce onboarding friction for a transit app serving
-              10,000+ riders.
-            </p>
-          </article>
-        </div>
+            <span class="entry__tag">UX Research</span>
+          </li>
+        </ol>
       </div>
     </section>
 
     <!-- ===================== EXPERIENCE ===================== -->
-    <section class="section experience" id="experience">
+    <section class="section" id="experience">
       <div class="container">
-        <div class="section__head reveal">
-          <p class="eyebrow"><span class="eyebrow__num">04</span> Experience</p>
-          <h2 class="section__title">Where I've worked</h2>
-        </div>
+        <header class="head reveal">
+          <p class="kicker"><span class="kicker__num">04</span> Experience</p>
+          <h2 class="title">Where I've worked</h2>
+        </header>
 
         <ol class="timeline">
           <li class="timeline__item reveal">
-            <span class="tl__dot" aria-hidden="true"></span>
             <p class="tl__date">Jun 2025 to Present</p>
-            <h3 class="tl__role">Marketing &amp; Communications Intern</h3>
-            <p class="tl__org">Penn Business Services · University of Pennsylvania</p>
-            <p class="tl__desc">
-              Lead content, photography, and analytics across Penn's business
-              units, including the Bookstore, Transit, and Ice Rink. Turned
-              engagement data into campaigns that lifted social metrics by about 40%.
-            </p>
+            <div class="tl__body">
+              <h3 class="tl__role">Marketing &amp; Communications Intern</h3>
+              <p class="tl__org">Penn Business Services, University of Pennsylvania</p>
+              <p class="tl__desc">
+                Lead content, photography, and analytics across Penn's business
+                units, including the Bookstore, Transit, and Ice Rink. Turned
+                engagement data into campaigns that lifted social metrics by
+                about 40%.
+              </p>
+            </div>
           </li>
-
           <li class="timeline__item reveal">
-            <span class="tl__dot" aria-hidden="true"></span>
             <p class="tl__date">May 2024 to Present</p>
-            <h3 class="tl__role">Student Researcher</h3>
-            <p class="tl__org">Cultural Evolution of Language Lab · University of Pennsylvania</p>
-            <p class="tl__desc">
-              Design and run artificial-language-learning experiments with about
-              10 participants weekly, studying how people adapt under ambiguity.
-              Build and analyze high-variance behavioral datasets in Python and R.
-            </p>
+            <div class="tl__body">
+              <h3 class="tl__role">Student Researcher</h3>
+              <p class="tl__org">Cultural Evolution of Language Lab, University of Pennsylvania</p>
+              <p class="tl__desc">
+                Design and run language-learning experiments studying how people
+                adapt under ambiguity, and build and analyze high-variance
+                behavioral data in Python and R.
+              </p>
+            </div>
           </li>
-
           <li class="timeline__item reveal">
-            <span class="tl__dot" aria-hidden="true"></span>
             <p class="tl__date">Aug 2022 to May 2026</p>
-            <h3 class="tl__role">Lead Admissions Assistant</h3>
-            <p class="tl__org">Penn Admissions · University of Pennsylvania</p>
-            <p class="tl__desc">
-              Promoted to lead a visitor center serving up to 300 prospective
-              students weekly. Onboard and coordinate a 12-person student team
-              and present Penn to thousands of families each year.
-            </p>
+            <div class="tl__body">
+              <h3 class="tl__role">Lead Admissions Assistant</h3>
+              <p class="tl__org">Penn Admissions, University of Pennsylvania</p>
+              <p class="tl__desc">
+                Promoted to lead a visitor center serving up to 300 prospective
+                students weekly, coordinating a 12-person student team and
+                presenting Penn to thousands of families each year.
+              </p>
+            </div>
           </li>
-
           <li class="timeline__item reveal">
-            <span class="tl__dot" aria-hidden="true"></span>
             <p class="tl__date">Jul 2022 to Nov 2022</p>
-            <h3 class="tl__role">Research &amp; Business Analyst Extern</h3>
-            <p class="tl__org">PwC · Remote</p>
-            <p class="tl__desc">
-              Built market-analysis and expansion frameworks for nonprofit
-              clients, turning qualitative and quantitative research into
-              executive-level recommendations.
-            </p>
+            <div class="tl__body">
+              <h3 class="tl__role">Research &amp; Business Analyst Extern</h3>
+              <p class="tl__org">PwC, Remote</p>
+              <p class="tl__desc">
+                Built market-analysis and expansion frameworks for nonprofit
+                clients, turning research into executive-level recommendations.
+              </p>
+            </div>
           </li>
         </ol>
 
-        <div class="leadership reveal">
-          <h3 class="leadership__title">Leadership &amp; service</h3>
-          <ul class="lead-grid">
-            <li><strong>Vice President</strong><span>Society of African Internationals at Penn</span></li>
-            <li><strong>Marketing Lead &amp; Board Member</strong><span>Penn African Students Association</span></li>
-            <li><strong>Calculus &amp; Biology Tutor</strong><span>University of Pennsylvania</span></li>
-            <li><strong>Lead Mentor</strong><span>EducationUSA · Nairobi, Kenya</span></li>
-            <li><strong>Equity Leadership Program</strong><span>Equity Group Foundation · Nairobi</span></li>
-            <li><strong>Member</strong><span>NSBE · Society of Women Engineers</span></li>
+        <div class="also reveal">
+          <p class="also__label">Leadership &amp; service</p>
+          <ul class="also__list">
+            <li><b>Vice President</b><span>Society of African Internationals at Penn</span></li>
+            <li><b>Marketing Lead</b><span>Penn African Students Association</span></li>
+            <li><b>Calculus &amp; Biology Tutor</b><span>University of Pennsylvania</span></li>
+            <li><b>Lead Mentor</b><span>EducationUSA, Nairobi</span></li>
+            <li><b>Equity Leadership Program</b><span>Equity Group Foundation</span></li>
+            <li><b>Member</b><span>NSBE &amp; Society of Women Engineers</span></li>
           </ul>
         </div>
       </div>
     </section>
 
     <!-- ===================== SKILLS ===================== -->
-    <section class="section skills" id="skills">
+    <section class="section" id="skills">
       <div class="container">
-        <div class="section__head reveal">
-          <p class="eyebrow"><span class="eyebrow__num">05</span> Toolkit</p>
-          <h2 class="section__title">What I work with</h2>
-        </div>
+        <header class="head reveal">
+          <p class="kicker"><span class="kicker__num">05</span> Toolkit</p>
+          <h2 class="title">What I work with</h2>
+        </header>
 
         <div class="toolkit reveal">
           <div class="skillset">
@@ -369,42 +332,41 @@
     </section>
 
     <!-- ===================== PHOTOGRAPHY ===================== -->
-    <section class="section photography" id="photography">
+    <section class="section" id="photography">
       <div class="container">
-        <div class="section__head reveal">
-          <p class="eyebrow"><span class="eyebrow__num">06</span> Photography</p>
-          <h2 class="section__title">Behind the camera</h2>
-          <p class="section__intro">
+        <header class="head reveal">
+          <p class="kicker"><span class="kicker__num">06</span> Photography</p>
+          <h2 class="title">Behind the camera</h2>
+          <p class="intro">
             I photograph when I'm not in the lab. I look for the moment a
             scene comes together.
           </p>
-        </div>
+        </header>
 
-        <div class="gallery reveal" id="gallery" aria-label="Photography gallery">
-          <!-- Tiles are injected by main.js from the PHOTOS array. -->
-        </div>
+        <div class="gallery reveal" id="gallery" aria-label="Photography"></div>
         <p class="gallery__note">Placeholder frames. Real photographs drop straight in.</p>
       </div>
     </section>
 
     <!-- ===================== CONTACT ===================== -->
-    <section class="section contact" id="contact">
-      <div class="container contact__inner reveal">
-        <p class="eyebrow"><span class="eyebrow__num">07</span> Contact</p>
-        <h2 class="contact__big">Let's work<br /><em>together.</em></h2>
-        <p class="contact__lead">
-          I'm looking for roles in research, product, and human-centered
-          technology. I'm always happy to talk about language, cognition,
-          or photography.
-        </p>
-
-        <div class="contact__links">
+    <section class="section" id="contact">
+      <div class="container">
+        <header class="head reveal">
+          <p class="kicker"><span class="kicker__num">07</span> Contact</p>
+          <h2 class="title">Let's work together.</h2>
+          <p class="intro">
+            I'm looking for roles in research, product, and human-centered
+            technology, and I'm always happy to talk about language, cognition,
+            or photography.
+          </p>
+        </header>
+        <p class="contact__lines reveal">
           <a class="btn btn--primary" href="mailto:nillaorina@gmail.com">
             nillaorina@gmail.com
             <svg class="btn__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </a>
           <a class="btn btn--ghost" href="https://www.linkedin.com/in/nilla-orina" target="_blank" rel="noopener">LinkedIn</a>
-        </div>
+        </p>
       </div>
     </section>
   </main>
@@ -412,35 +374,21 @@
   <!-- ===================== FOOTER ===================== -->
   <footer class="site-footer">
     <div class="container foot__inner">
-      <a class="nav__brand" href="#top" aria-label="Back to top">
-        <span class="brand__glyph" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="22" height="22">
-            <line x1="9" y1="23" x2="23" y2="9" />
-            <line x1="9" y1="23" x2="24" y2="20" />
-            <circle class="g-warm" cx="9" cy="23" r="3" />
-            <circle class="g-cool" cx="23" cy="9" r="3" />
-            <circle class="g-dim" cx="24" cy="20" r="1.8" />
-          </svg>
-        </span>
-        <span class="brand__name">Nilla Orina</span>
-      </a>
-      <p class="foot__meta">
-        Computer Science × Cognitive Science · Philadelphia
-        <span class="foot__year">© 2026</span>
-      </p>
-      <a class="to-top" href="#top">Back to top ↑</a>
+      <span class="foot__name">Nilla Orina</span>
+      <span class="foot__meta">Computer Science &amp; Cognitive Science · Philadelphia</span>
+      <a class="foot__top" href="#top">Back to top &uarr;</a>
     </div>
   </footer>
 
   <!-- ===================== LIGHTBOX ===================== -->
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photograph viewer" hidden>
-    <button class="lb__close" id="lb-close" aria-label="Close">×</button>
-    <button class="lb__nav lb__prev" id="lb-prev" aria-label="Previous">‹</button>
+    <button class="lb__close" id="lb-close" aria-label="Close">&times;</button>
+    <button class="lb__nav lb__prev" id="lb-prev" aria-label="Previous">&lsaquo;</button>
     <figure class="lb__stage">
       <div class="lb__frame" id="lb-frame"></div>
       <figcaption class="lb__cap"><span id="lb-cap"></span><span class="lb__count" id="lb-count"></span></figcaption>
     </figure>
-    <button class="lb__nav lb__next" id="lb-next" aria-label="Next">›</button>
+    <button class="lb__nav lb__next" id="lb-next" aria-label="Next">&rsaquo;</button>
   </div>
 
   <div class="grain" aria-hidden="true"></div>

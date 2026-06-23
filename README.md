@@ -30,17 +30,17 @@ python3 -m http.server 8000
 
 ```js
 var PHOTOS = [
-  { src: "images/golden-hour.jpg", caption: "Golden hour, Schuylkill", size: "tall" },
+  { src: "images/golden-hour.jpg", caption: "Golden hour, Schuylkill", size: "wide" },
   { src: "images/portrait.jpg",    caption: "Studio portrait",        size: "" },
   // ...
 ];
 ```
 
-- `caption` — shown on hover and in the lightbox.
-- `size` — `"tall"`, `"wide"`, or `""` for a normal square. Mix them for a dynamic mosaic.
-- Leave `src: ""` to keep the on-theme gradient placeholder for that slot.
+- `caption`: shown beneath the frame and in the lightbox.
+- `size`: `"wide"` for a double-width frame, or `""` for the default portrait. Mix them for a varied grid.
+- Leave `src: ""` to keep the gradient placeholder for that slot.
 
-Add or remove items freely — the grid and lightbox adjust automatically. Landscape photos look best at ~1600px on the long edge.
+Add or remove items freely; the grid and lightbox adjust automatically. Landscape photos look best at ~1600px on the long edge.
 
 ## Edit the words
 

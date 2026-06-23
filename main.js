@@ -248,25 +248,24 @@
 
     PHOTOS.forEach(function (p, idx) {
       var btn = document.createElement("button");
-      btn.className = "shot" + (p.size === "tall" ? " shot--tall" : p.size === "wide" ? " shot--wide" : "");
+      btn.className = "shot" + (p.size === "wide" ? " shot--wide" : "");
       btn.setAttribute("aria-label", "View photograph: " + p.caption);
       btn.dataset.index = idx;
 
+      var imgWrap = document.createElement("span");
+      imgWrap.className = "shot__img";
       if (p.src) {
         var img = document.createElement("img");
         img.src = p.src;
         img.alt = p.caption;
         img.loading = "lazy";
-        btn.appendChild(img);
+        imgWrap.appendChild(img);
       } else {
         var ph = document.createElement("span");
-        ph.className = "shot__ph";
         ph.style.background = p.grad;
-        btn.appendChild(ph);
+        imgWrap.appendChild(ph);
       }
-      var icon = document.createElement("span");
-      icon.className = "shot__icon";
-      btn.appendChild(icon);
+      btn.appendChild(imgWrap);
 
       var cap = document.createElement("span");
       cap.className = "shot__cap";
@@ -292,9 +291,10 @@
         img.src = p.src; img.alt = p.caption;
         frame.appendChild(img);
       } else {
-        frame.style.background = p.grad;
+        var span = document.createElement("span");
+        span.style.background = p.grad;
+        frame.appendChild(span);
       }
-      if (p.src) frame.style.background = "var(--surface)";
       capEl.textContent = p.caption;
       countEl.textContent = (current + 1) + " / " + PHOTOS.length;
     }
