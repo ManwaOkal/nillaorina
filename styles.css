@@ -836,7 +836,7 @@ b, strong { font-weight: 500; }
     left: 0;
     right: 0;
     z-index: 99;
-    margin: 0;
+    margin-bottom: 1.2rem;
     padding: 0;
     background: rgba(12, 12, 15, 0.98);
     border-bottom: 1px solid rgba(168, 85, 247, 0.22);
@@ -935,7 +935,7 @@ b, strong { font-weight: 500; }
     min-height: 100dvh;
     padding-block: var(--nav-h) 1.5rem;
   }
-  .hero__inner { padding-block: 0; }
+  .hero__inner { padding-top: 1.5rem; }
   .scroll-cue { display: none; }
 }
 
