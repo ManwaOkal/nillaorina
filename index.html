@@ -16,7 +16,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fascinate+Inline&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -27,15 +27,7 @@
   <header class="site-header" id="site-header">
     <div class="container nav__inner">
       <a class="brand" href="#top" aria-label="Nilla Orina home">
-        <span class="brand__glyph" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="24" height="24">
-            <line x1="9" y1="23" x2="23" y2="9" />
-            <line x1="9" y1="23" x2="24" y2="20" />
-            <circle class="g-warm" cx="9" cy="23" r="3.1" />
-            <circle class="g-cool" cx="23" cy="9" r="3.1" />
-            <circle class="g-dim" cx="24" cy="20" r="1.9" />
-          </svg>
-        </span>
+        <span class="brand__mark" aria-hidden="true">N</span>
       </a>
 
       <nav class="nav__panel" id="nav-panel" aria-label="Primary">
@@ -59,7 +51,6 @@
     <!-- ===================== HERO ===================== -->
     <section class="hero" id="hero">
       <canvas class="hero__canvas" id="hero-field" aria-hidden="true"></canvas>
-      <div class="hero__spotlight" id="hero-spotlight" aria-hidden="true"></div>
       <div class="hero__veil" aria-hidden="true"></div>
 
       <div class="container hero__inner">
@@ -189,16 +180,6 @@
             <li class="chip">High-variance behavioral data</li>
           </ul>
         </div>
-
-        <div class="toolkit toolkit--inline reveal">
-          <p class="skillset__label">Tools behind the work</p>
-          <ul class="chips chips--mono">
-            <li class="chip">Python</li><li class="chip">R</li>
-            <li class="chip">PCIbex</li><li class="chip">Empirica</li>
-            <li class="chip">JavaScript</li><li class="chip">SQL</li>
-            <li class="chip">Git</li><li class="chip">Figma</li>
-          </ul>
-        </div>
       </div>
     </section>
 
@@ -213,7 +194,10 @@
           <li class="entry reveal">
             <span class="entry__num">01</span>
             <div class="entry__body">
-              <h3 class="entry__title">STEM Tutor · Calculus &amp; Biology</h3>
+              <h3 class="entry__title">
+                <span class="entry__role">STEM Tutor</span>
+                <span class="entry__org">Calculus &amp; Biology</span>
+              </h3>
               <p class="entry__desc">
                 Part-time tutor for Penn undergraduates, Sep 2023 to Sep 2025.
                 I taught Calculus I/II and introductory biology with an emphasis
@@ -222,42 +206,48 @@
                 academic advisors and peer tutors to catch recurring gaps early.
               </p>
             </div>
-            <span class="entry__tag">Teaching · STEM</span>
           </li>
           <li class="entry reveal">
             <span class="entry__num">02</span>
             <div class="entry__body">
-              <h3 class="entry__title">Daily Pennsylvanian Scraper</h3>
+              <h3 class="entry__title">
+                <span class="entry__role">NLP Pipeline Developer</span>
+                <span class="entry__org">Research</span>
+              </h3>
               <p class="entry__desc">
-                A Python pipeline that scrapes the Daily Pennsylvanian from
-                messy, semi-structured HTML and pre-processes the text for NLP
-                work.
+                I built and maintained a Python pipeline that scrapes the
+                Daily Pennsylvanian from messy, semi-structured HTML and
+                preprocesses the text for NLP analyses in my research work.
               </p>
             </div>
-            <span class="entry__tag">Python · NLP</span>
           </li>
           <li class="entry reveal">
             <span class="entry__num">03</span>
             <div class="entry__body">
-              <h3 class="entry__title">PCOSphere</h3>
+              <h3 class="entry__title">
+                <span class="entry__role">Product Developer</span>
+                <span class="entry__org">PCOSphere</span>
+              </h3>
               <p class="entry__desc">
-                Tracks PCOS symptoms and daily behavioral inputs, then surfaces
-                lifestyle patterns through structured data models.
+                I designed and built a symptom-tracking product for PCOS:
+                structured daily inputs, behavioral logging, and data models
+                that surface lifestyle patterns over time.
               </p>
             </div>
-            <span class="entry__tag">Product · Data</span>
           </li>
           <li class="entry reveal">
             <span class="entry__num">04</span>
             <div class="entry__body">
-              <h3 class="entry__title">Penn Transit Product Strategy</h3>
+              <h3 class="entry__title">
+                <span class="entry__role">Product Strategy</span>
+                <span class="entry__org">Penn Business Services</span>
+              </h3>
               <p class="entry__desc">
-                Stakeholder interviews and user research for Penn Business
-                Services informed a product roadmap aimed at onboarding
-                friction for 10,000+ riders.
+                For Penn Business Services I led stakeholder interviews and
+                user research on Penn Transit, then shaped a product roadmap
+                aimed at onboarding friction for 10,000+ riders.
               </p>
             </div>
-            <span class="entry__tag">UX Research</span>
           </li>
         </ol>
       </div>
@@ -283,9 +273,6 @@
       <div class="container">
         <header class="head reveal">
           <p class="kicker"><span class="kicker__num">04</span> Contact</p>
-          <p class="head__thread">
-            Open to roles in research, product, and human-centered technology.
-          </p>
         </header>
         <p class="contact__lines reveal">
           <a class="btn btn--primary" href="mailto:nillaorina@gmail.com">

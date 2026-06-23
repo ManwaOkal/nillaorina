@@ -29,8 +29,7 @@
   ];
 
   /* ===========================================================
-     1. BUTTERFLIES — abstract silhouettes drifting behind the
-        hero veil; slow flutter and pitch, low opacity.
+     1. BUTTERFLIES — spawn off-screen, glide across hero, recycle
      =========================================================== */
   function initButterflies() {
     var canvas = document.getElementById("hero-field");
@@ -38,60 +37,146 @@
     var ctx = canvas.getContext("2d");
     var w = 0, h = 0, dpr = 1;
     var butterflies = [];
-    var raf = null, running = false;
+    var raf = null;
+    var running = false;
+    var lastT = 0;
+    var spawnTimer = 0;
 
-    var COLORS = [
-      "192,132,252",
-      "168,85,247",
-      "56,189,248",
-      "233,213,255"
-    ];
+    var RGB = "255,255,255";
+    var MAX = 14;
+    var EDGES = ["bottom-left", "bottom-right", "left", "right", "top-left", "top-right"];
 
-    function wing(ctx, side, flap, alpha, rgb) {
+    function wing(ctx, side, flap, alpha) {
       var s = side;
-      var f = flap;
-      ctx.fillStyle = "rgba(" + rgb + "," + alpha + ")";
+      var f = Math.max(0.35, flap);
+      ctx.fillStyle = "rgba(" + RGB + "," + alpha + ")";
       ctx.beginPath();
       ctx.moveTo(0, -1);
-      ctx.bezierCurveTo(s * 14 * f, -12 * f, s * 24 * f, -6 * f, s * 18 * f, 4);
-      ctx.bezierCurveTo(s * 12 * f, 10, s * 4, 5, 0, -1);
+      ctx.bezierCurveTo(s * 16 * f, -14 * f, s * 26 * f, -7 * f, s * 20 * f, 5);
+      ctx.bezierCurveTo(s * 13 * f, 11, s * 5, 6, 0, -1);
       ctx.fill();
       ctx.beginPath();
       ctx.moveTo(0, 2);
-      ctx.bezierCurveTo(s * 10 * f, 4, s * 16 * f, 14, s * 10 * f, 16);
-      ctx.bezierCurveTo(s * 5, 14, s * 2, 8, 0, 2);
+      ctx.bezierCurveTo(s * 11 * f, 5, s * 18 * f, 16, s * 11 * f, 18);
+      ctx.bezierCurveTo(s * 5, 15, s * 2, 9, 0, 2);
       ctx.fill();
     }
 
     function drawOne(b, t) {
       var flap = reduceMotion
-        ? 0.72
-        : 0.62 + 0.38 * Math.sin(t * 0.0024 * b.flapSpeed + b.flapPhase);
-      var pitch = reduceMotion ? 0 : 0.05 * Math.sin(t * 0.00038 + b.pitchPhase);
-      var angle = b.angle + pitch;
+        ? 0.7
+        : 0.45 + 0.55 * Math.abs(Math.sin(t * 0.003 * b.flapSpeed + b.flapPhase));
+      var bob = reduceMotion ? 0 : Math.sin(t * 0.0011 + b.pitchPhase) * 1.4;
 
       ctx.save();
-      ctx.translate(b.x, b.y);
-      ctx.rotate(angle);
+      ctx.translate(b.x, b.y + bob);
+      ctx.rotate(b.heading + Math.PI / 2);
       ctx.scale(b.scale, b.scale);
 
-      ctx.strokeStyle = "rgba(" + b.color + "," + (b.alpha * 0.85) + ")";
-      ctx.lineWidth = 0.55;
+      var a = b.alpha;
+      ctx.strokeStyle = "rgba(" + RGB + "," + (a * 0.9) + ")";
+      ctx.lineWidth = 0.6;
+      ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(0, -9);
-      ctx.lineTo(0, 9);
+      ctx.moveTo(0, -10);
+      ctx.lineTo(0, 10);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(0, -9);
-      ctx.quadraticCurveTo(-1.2, -12, -2.2, -13);
-      ctx.moveTo(0, -9);
-      ctx.quadraticCurveTo(1.2, -12, 2.2, -13);
+      ctx.moveTo(0, -10);
+      ctx.quadraticCurveTo(-1.4, -13, -2.5, -14);
+      ctx.moveTo(0, -10);
+      ctx.quadraticCurveTo(1.4, -13, 2.5, -14);
       ctx.stroke();
 
-      wing(ctx, -1, flap, b.alpha * 0.8, b.color);
-      wing(ctx, 1, flap, b.alpha * 0.8, b.color);
-
+      wing(ctx, -1, flap, a * 0.82);
+      wing(ctx, 1, flap, a * 0.82);
       ctx.restore();
+    }
+
+    function makeButterfly(x, y, heading) {
+      var speed = 0.5 + Math.random() * 0.45;
+      var alpha = 0.14 + Math.random() * 0.14;
+      return {
+        x: x,
+        y: y,
+        heading: heading,
+        speed: speed,
+        vx: Math.cos(heading) * speed,
+        vy: Math.sin(heading) * speed,
+        scale: 0.75 + Math.random() * 0.95,
+        alpha: alpha,
+        flapSpeed: 1 + Math.random() * 0.7,
+        flapPhase: Math.random() * Math.PI * 2,
+        pitchPhase: Math.random() * Math.PI * 2,
+        wanderPhase: Math.random() * Math.PI * 2,
+        wanderAmp: 0.05 + Math.random() * 0.07,
+        turnEase: 0.01 + Math.random() * 0.008,
+        lift: -0.01 - Math.random() * 0.012
+      };
+    }
+
+    function spawnInView() {
+      var heading = -Math.PI / 2 + (Math.random() - 0.5) * 0.9;
+      return makeButterfly(
+        w * (0.08 + Math.random() * 0.84),
+        h * (0.1 + Math.random() * 0.78),
+        heading
+      );
+    }
+
+    function spawn(edge) {
+      var e = edge || EDGES[Math.floor(Math.random() * EDGES.length)];
+      var heading;
+      var x;
+      var y;
+
+      if (e === "bottom-left") {
+        x = w * (0.05 + Math.random() * 0.38);
+        y = h + 24 + Math.random() * 55;
+        heading = -Math.PI / 2 + (Math.random() - 0.5) * 0.45;
+      } else if (e === "bottom-right") {
+        x = w * (0.57 + Math.random() * 0.38);
+        y = h + 24 + Math.random() * 55;
+        heading = -Math.PI / 2 + (Math.random() - 0.5) * 0.45;
+      } else if (e === "left") {
+        x = -24 - Math.random() * 28;
+        y = h * (0.2 + Math.random() * 0.65);
+        heading = 0.12 + (Math.random() - 0.5) * 0.28;
+      } else if (e === "right") {
+        x = w + 24 + Math.random() * 28;
+        y = h * (0.2 + Math.random() * 0.65);
+        heading = Math.PI - 0.12 + (Math.random() - 0.5) * 0.28;
+      } else if (e === "top-left") {
+        x = w * (0.08 + Math.random() * 0.32);
+        y = -20 - Math.random() * 28;
+        heading = Math.PI / 2 - 0.15 + (Math.random() - 0.5) * 0.22;
+      } else {
+        x = w * (0.6 + Math.random() * 0.32);
+        y = -20 - Math.random() * 28;
+        heading = Math.PI / 2 + 0.15 + (Math.random() - 0.5) * 0.22;
+      }
+
+      return makeButterfly(x, y, heading);
+    }
+
+    var emergeQueue = [];
+    var EMERGE_EDGES = [
+      "bottom-left", "bottom-right", "bottom-left", "bottom-right",
+      "left", "right", "bottom-left", "bottom-right"
+    ];
+
+    function queueEmergence() {
+      emergeQueue = EMERGE_EDGES.slice();
+    }
+
+    function stepEmergence() {
+      if (!emergeQueue.length) return;
+      butterflies.push(spawn(emergeQueue.shift()));
+    }
+
+    function offscreen(b) {
+      var pad = 80;
+      return b.x < -pad || b.x > w + pad || b.y < -pad || b.y > h + pad;
     }
 
     function size() {
@@ -101,56 +186,58 @@
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      build();
-    }
-
-    function build() {
-      var count = reduceMotion ? 3 : Math.max(4, Math.min(6, Math.round(w / 220)));
+      spawnTimer = 0;
+      emergeQueue = [];
       butterflies = [];
-      var i, t, item;
-      for (i = 0; i < count; i++) {
-        t = reduceMotion ? i / Math.max(count - 1, 1) : Math.random();
-        item = {
-          x: reduceMotion ? w * (0.55 + t * 0.35) : w * (0.5 + Math.random() * 0.48),
-          y: reduceMotion ? h * (0.25 + (i % 3) * 0.22) : h * (0.12 + Math.random() * 0.76),
-          vx: reduceMotion ? 0 : (Math.random() - 0.5) * 0.06,
-          vy: reduceMotion ? 0 : (Math.random() - 0.5) * 0.045,
-          angle: reduceMotion ? -0.3 + t * 0.5 : (Math.random() - 0.5) * 0.8,
-          scale: 0.65 + Math.random() * 0.75,
-          alpha: 0.1 + Math.random() * 0.09,
-          color: COLORS[i % COLORS.length],
-          flapSpeed: 0.7 + Math.random() * 0.5,
-          flapPhase: Math.random() * Math.PI * 2,
-          pitchPhase: Math.random() * Math.PI * 2,
-          wander: Math.random() * Math.PI * 2
-        };
-        butterflies.push(item);
-      }
-    }
-
-    function tick(t) {
-      var i, b, speed, target;
-      if (!reduceMotion) {
-        for (i = 0; i < butterflies.length; i++) {
-          b = butterflies[i];
-          b.wander += (Math.random() - 0.5) * 0.0035;
-          b.vx += Math.cos(b.wander) * 0.0012;
-          b.vy += Math.sin(b.wander) * 0.0012;
-          b.vx *= 0.998;
-          b.vy *= 0.998;
-          b.x += b.vx;
-          b.y += b.vy;
-          speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-          if (speed > 0.015) {
-            target = Math.atan2(b.vy, b.vx) + Math.PI / 2;
-            b.angle += (target - b.angle) * 0.008;
-          }
-          if (b.x < -90) b.x = w + 90;
-          else if (b.x > w + 90) b.x = -90;
-          if (b.y < -70) b.y = h + 70;
-          else if (b.y > h + 70) b.y = -70;
+      if (reduceMotion) {
+        var count = Math.max(5, Math.min(8, Math.round(w / 140)));
+        var i;
+        for (i = 0; i < count; i++) {
+          var b = spawnInView();
+          b.x = w * (0.52 + (i / Math.max(count - 1, 1)) * 0.35);
+          b.y = h * (0.2 + (i % 3) * 0.24);
+          butterflies.push(b);
         }
       }
+    }
+
+    function tick(t, dt) {
+      var i, b, targetHeading, turn;
+
+      if (!reduceMotion) {
+        spawnTimer += dt;
+        if (emergeQueue.length && spawnTimer > 320) {
+          stepEmergence();
+          spawnTimer = 0;
+        } else if (!emergeQueue.length && butterflies.length < MAX && spawnTimer > 750) {
+          butterflies.push(spawn());
+          spawnTimer = 0;
+        }
+
+        for (i = butterflies.length - 1; i >= 0; i--) {
+          b = butterflies[i];
+          b.wanderPhase += dt * 0.0004;
+          targetHeading = b.heading +
+            Math.sin(b.wanderPhase) * b.wanderAmp +
+            Math.sin(b.wanderPhase * 0.5 + 1.2) * (b.wanderAmp * 0.4);
+
+          turn = targetHeading - b.heading;
+          while (turn > Math.PI) turn -= Math.PI * 2;
+          while (turn < -Math.PI) turn += Math.PI * 2;
+          b.heading += turn * b.turnEase;
+
+          b.vx = Math.cos(b.heading) * b.speed;
+          b.vy = Math.sin(b.heading) * b.speed + b.lift;
+
+          b.x += b.vx * dt * 0.06;
+          b.y += b.vy * dt * 0.06;
+
+          if (offscreen(b)) {
+            butterflies.splice(i, 1);
+          }
+        }
+      }
+
       ctx.clearRect(0, 0, w, h);
       for (i = 0; i < butterflies.length; i++) {
         drawOne(butterflies[i], t);
@@ -159,27 +246,37 @@
 
     function frame(t) {
       if (!running) return;
-      tick(t);
+      var dt = lastT ? Math.min(t - lastT, 48) : 16;
+      lastT = t;
+      tick(t, dt);
       raf = requestAnimationFrame(frame);
     }
+
     function start() {
-      if (running || reduceMotion) return;
+      if (running) return;
       running = true;
+      lastT = 0;
+      spawnTimer = 0;
+      if (!reduceMotion && butterflies.length === 0) {
+        queueEmergence();
+      }
       raf = requestAnimationFrame(frame);
     }
+
     function stop() {
       running = false;
       if (raf) cancelAnimationFrame(raf);
       raf = null;
+      lastT = 0;
     }
 
     size();
-    tick(0);
+    tick(0, 16);
 
     var rt;
     window.addEventListener("resize", function () {
       clearTimeout(rt);
-      rt = setTimeout(function () { size(); tick(0); }, 180);
+      rt = setTimeout(function () { size(); tick(performance.now(), 16); }, 180);
     });
 
     var hero = document.getElementById("hero");
@@ -190,81 +287,6 @@
     } else {
       start();
     }
-    document.addEventListener("visibilitychange", function () {
-      document.hidden ? stop() : start();
-    });
-  }
-
-  var heroSpotlightMQ = window.matchMedia(
-    "(hover: hover) and (pointer: fine) and (min-width: 881px)"
-  );
-
-  function initHeroSpotlight() {
-    var hero = document.getElementById("hero");
-    var spot = document.getElementById("hero-spotlight");
-    if (!hero || !spot || reduceMotion || !heroSpotlightMQ.matches) return;
-
-    var targetX = 72;
-    var targetY = 28;
-    var currentX = targetX;
-    var currentY = targetY;
-    var raf = null;
-    var running = false;
-    var inHero = true;
-
-    function apply() {
-      if (!running) return;
-      currentX += (targetX - currentX) * 0.045;
-      currentY += (targetY - currentY) * 0.045;
-      spot.style.setProperty("--spot-x", currentX + "%");
-      spot.style.setProperty("--spot-y", currentY + "%");
-      raf = requestAnimationFrame(apply);
-    }
-
-    function start() {
-      if (running || !inHero || document.hidden) return;
-      running = true;
-      spot.classList.remove("is-away");
-      raf = requestAnimationFrame(apply);
-    }
-
-    function stop() {
-      running = false;
-      if (raf) {
-        cancelAnimationFrame(raf);
-        raf = null;
-      }
-      spot.classList.add("is-away");
-    }
-
-    function move(e) {
-      if (!inHero) return;
-      var r = hero.getBoundingClientRect();
-      if (
-        e.clientX < r.left || e.clientX > r.right ||
-        e.clientY < r.top || e.clientY > r.bottom
-      ) return;
-      targetX = ((e.clientX - r.left) / r.width) * 100;
-      targetY = ((e.clientY - r.top) / r.height) * 100;
-    }
-
-    document.addEventListener("mousemove", move, { passive: true });
-    hero.addEventListener("mouseleave", function () {
-      targetX = 72;
-      targetY = 28;
-    });
-
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          inHero = en.isIntersecting;
-          inHero ? start() : stop();
-        });
-      }, { threshold: 0 }).observe(hero);
-    } else {
-      start();
-    }
-
     document.addEventListener("visibilitychange", function () {
       document.hidden ? stop() : start();
     });
@@ -305,9 +327,12 @@
      =========================================================== */
   function initScroll() {
     var header = document.querySelector(".site-header");
+    var cue = document.querySelector(".scroll-cue");
+
     function onScroll() {
       if (window.scrollY > 24) header.classList.add("scrolled");
       else header.classList.remove("scrolled");
+      if (cue) cue.classList.toggle("is-hidden", window.scrollY > 48);
     }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -516,7 +541,6 @@
      =========================================================== */
   function init() {
     initButterflies();
-    initHeroSpotlight();
     initBackToTop();
     initScroll();
     initMenu();
